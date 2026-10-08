@@ -1,0 +1,5 @@
+.omc/
+.claude/settings.local.json
+.claude/agents/
+.claude/skills/
+.DS_Store

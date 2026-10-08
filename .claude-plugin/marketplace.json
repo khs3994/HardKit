@@ -1,0 +1,13 @@
+{
+  "name": "hardkit",
+  "owner": {
+    "name": "khs3994"
+  },
+  "plugins": [
+    {
+      "name": "hardkit",
+      "source": "./",
+      "description": "A toolkit for the hard side of software development — code review, PR queues, and verification."
+    }
+  ]
+}

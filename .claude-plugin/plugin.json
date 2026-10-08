@@ -1,0 +1,17 @@
+{
+  "name": "hardkit",
+  "version": "0.1.0",
+  "description": "A toolkit for the hard side of software development — code review, PR queues, and verification.",
+  "author": {
+    "name": "khs3994"
+  },
+  "homepage": "https://github.com/khs3994/HardKit",
+  "repository": "https://github.com/khs3994/HardKit",
+  "license": "MIT",
+  "keywords": [
+    "code-review",
+    "pull-request",
+    "github",
+    "verification"
+  ]
+}
