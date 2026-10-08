@@ -1,6 +1,6 @@
 {
   "name": "hardkit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "A toolkit for the hard side of software development — code review, PR queues, and verification.",
   "author": {
     "name": "khs3994"

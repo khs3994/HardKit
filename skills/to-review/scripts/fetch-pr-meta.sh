@@ -1,26 +1,23 @@
 #!/bin/bash
-# 특정 PR의 리뷰-대기 메타데이터를 조회한다.
-# Usage: fetch-pr-meta.sh <owner/repo> <pr-number>
-# 출력: JSON 객체 (요약용 body + 변경 규모 + 리뷰 요청 시점 기준 경과 시간)
+# 특정 PR의 리뷰-대기 메타데이터를 한 줄 JSON으로 출력한다. 조회 전용.
+# 사용법: fetch-pr-meta.sh <owner/repo> <pr-number> [my-login]
+#   my-login을 주면 gh api user 호출을 생략한다. fetch-review-queue.sh가 한 번만 조회해 넘긴다.
 #
-# elapsed 기준: 내가(@me) 리뷰어로 "요청된" 시점(timeline의 review_requested 이벤트).
+# elapsed 기준: 내가 리뷰어로 "요청된" 시점(timeline의 review_requested 이벤트).
 # 팀 단위 요청 등으로 개인 요청 이벤트가 없으면 PR 생성 시점(createdAt)으로 폴백한다.
 set -euo pipefail
 
 repo="$1"
 num="$2"
-me="${GH_LOGIN:-$(gh api user --jq .login)}"
+me="${3:-${GH_LOGIN:-$(gh api user --jq .login)}}"
 
 pr=$(gh pr view "$num" --repo "$repo" \
-  --json title,author,body,changedFiles,additions,deletions,createdAt,url,isDraft)
+  --json title,author,body,changedFiles,additions,deletions,createdAt,url,isDraft,baseRefName,headRefName)
 
-# 내가 리뷰어로 요청된 가장 최근 시각 (없으면 빈 문자열)
-# timeline은 오래된 순이고 review_requested는 보통 맨 앞(PR 생성 직후)에 있으므로,
-# 끝까지 긁는 --paginate 대신 첫 한 페이지(최대 100개)만 단발로 가져온다 → API 호출 1회, 빠름.
-rr=$(gh api "repos/$repo/issues/$num/timeline?per_page=100" \
-  -q "[.[] | select(.event==\"review_requested\" and .requested_reviewer.login==\"$me\") | .created_at] | last" \
-  2>/dev/null || echo "")
-[ "$rr" = "null" ] && rr=""
+# 타임라인이 100건을 넘는 PR에서도 요청 시각을 놓치지 않도록 끝까지 읽는다.
+rr=$(gh api "repos/$repo/issues/$num/timeline?per_page=100" --paginate \
+  --jq ".[] | select(.event==\"review_requested\" and .requested_reviewer.login==\"$me\") | .created_at" \
+  2>/dev/null | tail -n 1 || true)
 
 created=$(echo "$pr" | jq -r .createdAt)
 base="${rr:-$created}"
@@ -44,7 +41,7 @@ fi
 
 if [ -n "$rr" ]; then source="review_requested"; else source="created"; fi
 
-echo "$pr" | jq \
+echo "$pr" | jq -c \
   --arg repo "$repo" \
   --arg num "$num" \
   --arg base "$base" \
@@ -62,6 +59,8 @@ echo "$pr" | jq \
     deletions: .deletions,
     url: .url,
     isDraft: .isDraft,
+    baseRefName: .baseRefName,
+    headRefName: .headRefName,
     createdAt: .createdAt,
     reviewRequestedAt: $base,
     elapsedSource: $source,
