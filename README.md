@@ -17,10 +17,12 @@
 
 | 이름 | 종류 | 하는 일 | 예시 |
 |---|---|---|---|
-| `/to-review` | 스킬 | 내가 리뷰어인 열린 PR을 대기 오래된 순으로 보여 준 뒤, PR마다 에이전트를 띄워 `review-pr`로 리뷰하고 결과를 한 표로 종합한다. `--list-only`면 목록만 | `/to-review`, `/to-review --repo fan-maum/trot-android --limit 3` |
+| `/to-review` | 스킬 | 내가 리뷰어인 열린 PR을 대기 오래된 순으로 보여 준 뒤, PR마다 에이전트를 띄워 `review-pr`로 리뷰하고 결과를 요약 표로 종합한다. 같은 커밋을 이미 리뷰했으면 저장된 보고서를 재사용한다. `--list-only`면 목록만, `--fresh`면 재리뷰, `--full`이면 전문도 출력 | `/to-review`, `/to-review --repo fan-maum/trot-android --limit 3` |
 | `/review-pr` | 스킬 | PR의 목적을 파악하고, 목적대로 구현됐는지 확인한 뒤, 결함을 호출부까지 추적해 유저 재현 가능성과 함께 현상·원인·근거·해결 방안으로 보고한다 | `/review-pr 1593`, "이 PR 머지해도 돼?" + URL |
 
 두 스킬 모두 `gh` 로그인과 `jq`가 필요합니다. 사용자가 명시적으로 요청하기 전에는 GitHub에 코멘트·리뷰·approve를 남기지 않습니다.
+
+보고서는 `~/.hardkit/reviews/<owner>/<repo>/<PR번호>-<head 커밋 12자리>.md`에 저장됩니다(`HARDKIT_REVIEW_DIR`로 변경). `to-review`는 저장소들을 모아 둔 폴더나 그중 한 저장소 안에서 실행해야 PR 저장소의 로컬 클론을 찾아 호출부까지 추적합니다(`HARDKIT_REPOS_DIR`로 지정 가능).
 
 ## 로컬 개발
 

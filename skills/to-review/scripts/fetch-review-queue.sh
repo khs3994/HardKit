@@ -12,6 +12,8 @@ repo_filter=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --repo) repo_filter="$2"; shift 2 ;;
+    --repos-dir) export HARDKIT_REPOS_DIR="$2"; shift 2 ;;
+    --list-only) export HARDKIT_WITH_BODY=1; shift ;;
     *) echo "알 수 없는 옵션: $1" >&2; exit 2 ;;
   esac
 done
@@ -49,4 +51,4 @@ for e in "$tmp"/*.err; do
 done
 
 cat "$tmp"/*.json | jq -s --arg me "$me" --argjson total "$total" \
-  '{me: $me, total: $total, prs: sort_by(-.elapsedHours)}'
+  '{me: $me, total: $total, cached: ([.[] | select(.cachedReport != null)] | length), prs: sort_by(-.elapsedHours)}'
